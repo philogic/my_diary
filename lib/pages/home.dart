@@ -7,6 +7,10 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+
+  void pressAddButton() {
+    print('Button Pressed!');
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,6 +25,16 @@ class _HomeState extends State<Home> {
             ? Center(child: CircularProgressIndicator())
             : Center(child: Text('My Diary'));
         },
+      ),
+      bottomNavigationBar: BottomAppBar(
+        shape: CircularNotchedRectangle(),
+        child: Padding(padding: EdgeInsets.all(24.0)),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: FloatingActionButton(
+        tooltip: 'Add to Diary',
+        child: Icon(Icons.add),
+        onPressed: pressAddButton,
       ),
     );
   }
