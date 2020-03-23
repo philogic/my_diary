@@ -10,6 +10,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'My Diary',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        bottomAppBarColor: Colors.blue
+      ),
       home: Home(),
     );
   }

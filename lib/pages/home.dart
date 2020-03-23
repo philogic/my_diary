@@ -13,7 +13,15 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         title: Text('Home'),
       ),
-      body: Container(),
+      body: FutureBuilder(
+        initialData: [],
+        future: null,
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          return !snapshot.hasData 
+            ? Center(child: CircularProgressIndicator())
+            : Center(child: Text('My Diary'));
+        },
+      ),
     );
   }
 }
