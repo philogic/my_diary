@@ -18,7 +18,7 @@ class _EditEntryState extends State<EditEntry> {
 
   ContentEdit _contentEdit;
   String _title;
-  DateTime _selectedDate;
+  DateTime _selectedDateAndTime;
   TextEditingController _moodController = TextEditingController();
   TextEditingController _noteController = TextEditingController();
   FocusNode _moodFocus = FocusNode();
@@ -32,11 +32,11 @@ class _EditEntryState extends State<EditEntry> {
     _contentEdit.content = widget.contentEdit.content;
 
     if (widget.add) {
-      _selectedDate = DateTime.now();
+      _selectedDateAndTime = DateTime.now();
       _moodController.text = '';
       _noteController.text = '';
     } else {
-      _selectedDate = DateTime.parse(_contentEdit.content.date);
+      _selectedDateAndTime = DateTime.parse(_contentEdit.content.date);
       _moodController.text = _contentEdit.content.mood;
       _noteController.text = _contentEdit.content.note;
     }
@@ -83,7 +83,42 @@ class _EditEntryState extends State<EditEntry> {
         title: Text('$_title Entry'),
         automaticallyImplyLeading: false,
       ),
-      body: Container(),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            children: <Widget>[
+              FlatButton(
+                padding: EdgeInsets.all(0.0),
+                child: Row(
+                  children: <Widget>[
+                    Icon(
+                      Icons.calendar_today,
+                      size: 22.0,
+                      color: Colors.black54,
+                    ),
+                    SizedBox(width: 16.0),
+                    Text(
+                      DateFormat.yMMMEd().format(_selectedDateAndTime),
+                      style: TextStyle(
+                        color: Colors.black54,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                onPressed: () async {
+                  FocusScope.of(context).requestFocus(FocusNode());
+                  DateTime _pickerDateAndTime = await _selectDateAndTime(_selectedDateAndTime);
+                  setState(() {
+                    _selectedDateAndTime = _pickerDateAndTime;
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
