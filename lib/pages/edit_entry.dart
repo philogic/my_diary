@@ -115,6 +115,64 @@ class _EditEntryState extends State<EditEntry> {
                   });
                 },
               ),
+              TextField(
+                controller: _moodController,
+                autofocus: true,
+                textInputAction: TextInputAction.next,
+                focusNode: _moodFocus,
+                textCapitalization: TextCapitalization.words,
+                decoration: InputDecoration(
+                  labelText: 'Mood',
+                  icon: Icon(Icons.mood)
+                ),
+                onSubmitted: (submitted) {
+                  FocusScope.of(context).requestFocus(_noteFocus);
+                },
+              ),
+              TextField(
+                controller: _noteController,
+                autofocus: true,
+                textInputAction: TextInputAction.newline,
+                focusNode: _noteFocus,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: InputDecoration(
+                  labelText: 'Note',
+                  icon: Icon(Icons.subject)
+                ),
+                onSubmitted: (submitted) {
+                  FocusScope.of(context).requestFocus(_noteFocus);
+                },
+                maxLines: null,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  FlatButton(
+                    child: Text('Cancel'),
+                    color: Colors.grey.shade100,
+                    onPressed: () {
+                      _contentEdit.action = 'Cancel';
+                      Navigator.pop(context, _contentEdit);
+                    },
+                  ),
+                  SizedBox(width: 8.0),
+                  FlatButton(
+                    child: Text('Save'),
+                    color: Colors.lightGreen.shade100,
+                    onPressed: () {
+                      _contentEdit.action = 'Save';
+                      String _id = widget.add ? Random().nextInt(9999999).toString() : _contentEdit.content.id;
+                      _contentEdit.content = Content(
+                        id: _id,
+                        date: _selectedDateAndTime.toString(),
+                        mood: _moodController.text,
+                        note: _noteController.text
+                      );
+                      Navigator.pop(context, _contentEdit);
+                    },
+                  ),
+                ],
+              )
             ],
           ),
         ),
