@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:my_diary/pages/edit_entry.dart';
+import 'package:my_diary/classes/database.dart';
+import 'package:intl/intl.dart';
 
 
 class Home extends StatefulWidget {
@@ -7,6 +10,48 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  Database _database;
+
+  Future<List<Content>> _loadContents() async {
+    await DatabaseFileRoutines().readContents().then((contentsJson) {
+      _database = databaseFromJson(contentsJson);
+      _database.content.sort((comt1, comt2) => comt2.date.compareTo(comt1.date));
+    });
+    return _database.content;
+  }
+
+  void _addOrEditContent({bool add, int index, Content content}) async {
+    ContentEdit _contentEdit = ContentEdit(action: '', content: content);
+    _contentEdit = await Navigator.push(
+      context, 
+      MaterialPageRoute(
+        builder: (context) => EditEntry(
+          add: add,
+          index: index,
+          contentEdit: _contentEdit,
+        ),
+        fullscreenDialog: true
+      )
+    );
+    switch (_contentEdit.action) {
+      case 'Save':
+        if (add) {
+          setState(() {
+            _database.content.add(_contentEdit.content);
+          });
+        } else {
+          setState(() {
+            _database.content[index] = _contentEdit.content;
+          });
+        }
+        DatabaseFileRoutines().writeContents(databaseToJson(_database));
+        break;
+      case 'Cancel':
+        break;
+      default:
+        break;
+    }
+  }
 
   void pressAddButton() {
     print('Button Pressed!');
