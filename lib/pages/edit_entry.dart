@@ -7,16 +7,16 @@ import 'package:my_diary/classes/database.dart';
 class EditEntry extends StatefulWidget {
   final bool add;
   final int index;
-  final ContentEdit contentEdit;
+  final JournalEdit journalEdit;
 
-  const EditEntry({Key key, this.add, this.index, this.contentEdit}) : super(key: key);
+  const EditEntry({Key key, this.add, this.index, this.journalEdit}) : super(key: key);
   @override
   _EditEntryState createState() => _EditEntryState();
 }
 
 class _EditEntryState extends State<EditEntry> {
 
-  ContentEdit _contentEdit;
+  JournalEdit _journalEdit;
   String _title;
   DateTime _selectedDateAndTime;
   TextEditingController _moodController = TextEditingController();
@@ -27,18 +27,18 @@ class _EditEntryState extends State<EditEntry> {
   @override
   void initState() { 
     super.initState();
-    _contentEdit = ContentEdit(action: 'Cancel', content: widget.contentEdit.content);
+    _journalEdit = JournalEdit(action: 'Cancel', journal: widget.journalEdit.journal);
     _title = widget.add ? 'Add' : 'Edit';
-    _contentEdit.content = widget.contentEdit.content;
+    _journalEdit.journal = widget.journalEdit.journal;
 
     if (widget.add) {
       _selectedDateAndTime = DateTime.now();
       _moodController.text = '';
       _noteController.text = '';
     } else {
-      _selectedDateAndTime = DateTime.parse(_contentEdit.content.date);
-      _moodController.text = _contentEdit.content.mood;
-      _noteController.text = _contentEdit.content.note;
+      _selectedDateAndTime = DateTime.parse(_journalEdit.journal.date);
+      _moodController.text = _journalEdit.journal.mood;
+      _noteController.text = _journalEdit.journal.note;
     }
   }
 
@@ -151,8 +151,8 @@ class _EditEntryState extends State<EditEntry> {
                     child: Text('Cancel'),
                     color: Colors.grey.shade100,
                     onPressed: () {
-                      _contentEdit.action = 'Cancel';
-                      Navigator.pop(context, _contentEdit);
+                      _journalEdit.action = 'Cancel';
+                      Navigator.pop(context, _journalEdit);
                     },
                   ),
                   SizedBox(width: 8.0),
@@ -160,15 +160,15 @@ class _EditEntryState extends State<EditEntry> {
                     child: Text('Save'),
                     color: Colors.lightGreen.shade100,
                     onPressed: () {
-                      _contentEdit.action = 'Save';
-                      String _id = widget.add ? Random().nextInt(9999999).toString() : _contentEdit.content.id;
-                      _contentEdit.content = Content(
+                      _journalEdit.action = 'Save';
+                      String _id = widget.add ? Random().nextInt(9999999).toString() : _journalEdit.journal.id;
+                      _journalEdit.journal = Journal(
                         id: _id,
                         date: _selectedDateAndTime.toString(),
                         mood: _moodController.text,
                         note: _noteController.text
                       );
-                      Navigator.pop(context, _contentEdit);
+                      Navigator.pop(context, _journalEdit);
                     },
                   ),
                 ],

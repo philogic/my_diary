@@ -12,39 +12,39 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   Database _database;
 
-  Future<List<Content>> _loadContents() async {
-    await DatabaseFileRoutines().readContents().then((contentsJson) {
-      _database = databaseFromJson(contentsJson);
-      _database.content.sort((comt1, comt2) => comt2.date.compareTo(comt1.date));
+  Future<List<Journal>> _loadjournals() async {
+    await DatabaseFileRoutines().readjournals().then((journalsJson) {
+      _database = databaseFromJson(journalsJson);
+      _database.journal.sort((comp1, comp2) => comp2.date.compareTo(comp1.date));
     });
-    return _database.content;
+    return _database.journal;
   }
 
-  void _addOrEditContent({bool add, int index, Content content}) async {
-    ContentEdit _contentEdit = ContentEdit(action: '', content: content);
-    _contentEdit = await Navigator.push(
+  void _addOrEditjournal({bool add, int index, Journal journal}) async {
+    JournalEdit _journalEdit = JournalEdit(action: "", journal: journal);
+    _journalEdit = await Navigator.push(
       context, 
       MaterialPageRoute(
         builder: (context) => EditEntry(
           add: add,
           index: index,
-          contentEdit: _contentEdit,
+          journalEdit: _journalEdit,
         ),
         fullscreenDialog: true
       )
     );
-    switch (_contentEdit.action) {
+    switch (_journalEdit.action) {
       case 'Save':
         if (add) {
           setState(() {
-            _database.content.add(_contentEdit.content);
+            _database.journal.add(_journalEdit.journal);
           });
         } else {
           setState(() {
-            _database.content[index] = _contentEdit.content;
+            _database.journal[index] = _journalEdit.journal;
           });
         }
-        DatabaseFileRoutines().writeContents(databaseToJson(_database));
+        DatabaseFileRoutines().writejournals(databaseToJson(_database));
         break;
       case 'Cancel':
         break;
@@ -53,22 +53,19 @@ class _HomeState extends State<Home> {
     }
   }
 
-  void pressAddButton() {
-    print('Button Pressed!');
-  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Home'),
+        title: Text('My Diary'),
       ),
       body: FutureBuilder(
         initialData: [],
-        future: null,
+        future: _loadjournals(),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           return !snapshot.hasData 
             ? Center(child: CircularProgressIndicator())
-            : Center(child: Text('My Diary'));
+            : _buildListViewSeparated(snapshot);
         },
       ),
       bottomNavigationBar: BottomAppBar(
@@ -79,8 +76,76 @@ class _HomeState extends State<Home> {
       floatingActionButton: FloatingActionButton(
         tooltip: 'Add to Diary',
         child: Icon(Icons.add),
-        onPressed: pressAddButton,
+        onPressed: () {
+          _addOrEditjournal(add: true, index: -1, journal: Journal());
+        },
       ),
+    );
+  }
+
+  Widget _buildListViewSeparated(AsyncSnapshot snapshot) {
+    return ListView.separated(
+      itemCount: snapshot.data.length,
+      itemBuilder: (BuildContext context, int index) {
+        String _titleDate = DateFormat.yMMMd().format(DateTime.parse(snapshot.data[index].date));
+        String _subtitle = snapshot.data[index].mood + "\n" + snapshot.data[index].note;
+        return Dismissible(
+          key: Key(snapshot.data[index].id),
+          background: Container(
+              color: Colors.red,
+              alignment: Alignment.centerLeft,
+              padding: EdgeInsets.only(left: 16.0),
+              child: Icon(
+                Icons.delete,
+                color: Colors.white,
+              ),
+          ),
+          secondaryBackground: Container(
+              color: Colors.red,
+              alignment: Alignment.centerRight,
+              padding: EdgeInsets.only(right: 16.0),
+              child: Icon(
+                Icons.delete,
+                color: Colors.white,
+              ),
+          ),
+          child: ListTile(
+            leading: Column(
+              children: <Widget>[
+                Text(DateFormat.d().format(DateTime.parse(snapshot.data[index].date)),
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 32.0,
+                      color: Colors.blue),
+                ),
+              ],
+            ),
+            title: Text(
+              _titleDate,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Text(_subtitle),
+            onTap: () async {
+              _addOrEditjournal(
+                  add: false,
+                  index: index,
+                  journal: snapshot.data[index],
+              );
+            },
+          ),
+          onDismissed: (direction) {
+            setState(() {
+              _database.journal.removeAt(index);
+            });
+            DatabaseFileRoutines().writejournals(databaseToJson(_database));
+          },
+        );
+      },
+      separatorBuilder: (BuildContext context, int index) {
+        return Divider(
+          color: Colors.grey,
+        );
+      },
     );
   }
 }

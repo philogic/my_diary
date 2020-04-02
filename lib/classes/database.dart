@@ -4,40 +4,43 @@ import 'package:path_provider/path_provider.dart';
 
 
 class DatabaseFileRoutines {
+
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
+
     return directory.path;
   }
 
   Future<File> get _localFile async {
     final path = await _localPath;
-    return File('$path/local_data.json');
+
+    return File('$path/local_persistence.json');
   }
 
-  Future<String> readContents() async {
-
+  Future<String> readjournals() async {
     try {
-      
       final file = await _localFile;
 
       if (!file.existsSync()) {
-        print('File does not exist: ${file.absolute}');
-        await writeContents('{"Contents": []}');
+        print("File does not Exist: ${file.absolute}");
+        await writejournals('{"journals": []}');
       }
-      String contents = await file.readAsString();
-      return contents;
 
+      String items = await file.readAsString();
+      return items;
     } catch (e) {
-      print('Error readContents $e');
-      return '';
+      print("error readjournals: $e");
+      return "";
     }
   }
 
-  Future<File> writeContents (String json) async {
+  Future<File> writejournals(String json) async {
     final file = await _localFile;
+
     return file.writeAsString('$json');
   }
 }
+
 
 Database databaseFromJson(String str) {
   final dataFromJson = json.decode(str);
@@ -49,38 +52,36 @@ String databaseToJson(Database data) {
   return json.encode(dataToJson);
 }
 
-
-
 class Database {
-  List<Content> content;
+  List<Journal> journal;
 
   Database({
-    this.content
+    this.journal,
   });
 
   factory Database.fromJson(Map<String, dynamic> json) => Database(
-    content: List<Content>.from(json["contents"].map((x) => Content.fromJson(x))),
+    journal: List<Journal>.from(json["journals"].map((x) => Journal.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
-    "contents": List<dynamic>.from(content.map((x) => x.toJson())),
+    "journals": List<dynamic>.from(journal.map((x) => x.toJson())),
   };
 }
 
-class Content {
+class Journal {
   String id;
   String date;
   String mood;
   String note;
 
-  Content({
+  Journal({
     this.id,
     this.date,
     this.mood,
-    this.note
+    this.note,
   });
 
-  factory Content.fromJson(Map<String, dynamic> json) => Content(
+  factory Journal.fromJson(Map<String, dynamic> json) => Journal(
     id: json["id"],
     date: json["date"],
     mood: json["mood"],
@@ -91,12 +92,13 @@ class Content {
     "id": id,
     "date": date,
     "mood": mood,
-    "note": note
+    "note": note,
   };
 }
 
-class ContentEdit {
+class JournalEdit {
   String action;
-  Content content;
-  ContentEdit({this.action, this.content});
+  Journal journal;
+
+  JournalEdit({this.action, this.journal});
 }
